@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protótipo Vídeo 9:16 - SOS Serviços Araraquara</title>
+<style>
+  @import url('https://googleapis.com');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: #0b1120;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Montserrat', sans-serif;
+    color: #fff;
+  }
+
+  .video-container {
+    position: relative;
+    width: 360px;
+    height: 640px;
+    background: linear-gradient(145deg, #092047 0%, #15438e 50%, #071733 100%);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 4px #1e293b;
+  }
+
+  .progress-bars {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    gap: 4px;
+    z-index: 20;
+  }
+
+  .bar-bg {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    width: 0%;
+    background: #fbbf24;
+    transition: width 0.1s linear;
+  }
+
+  .glow-circle {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.18) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px 130px 24px;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+
+  .scene.active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+  .badge-gold {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    color: #092047;
+    font-weight: 900;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1.15;
+    text-transform: uppercase;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 14px;
+  }
+
+  .gold-text {
+    color: #fbbf24;
+  }
+
+  .phone-mockup {
+    width: 210px;
+    background: #ffffff;
+    color: #0f172a;
+    border-radius: 28px;
+    padding: 16px;
+    border: 6px solid #1e293b;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    margin: 12px 0;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .phone-header {
+    font-size: 12px;
+    font-weight: 800;
+    color: #15438e;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .service-card {
+    background: #f1f5f9;
+    padding: 10px 6px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #092047;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .service-card span {
+    font-size: 24px;
+  }
+
+  .google-play-btn {
+    background: #000000;
+    border: 2px solid #fbbf24;
+    border-radius: 14px;
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    animation: pulse 1.8s infinite;
+  }
+
+  .gp-text {
+    text-align: left;
+  }
+
+  .gp-small {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #cbd5e1;
+  }
+
+  .gp-big {
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .feature-pill {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    padding: 12px 18px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 15px;
+    margin: 8px 0;
+    width: 100%;
+  }
+
+  .big-icon {
+    font-size: 68px;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));
+    animation: bounce 2s infinite;
+  }
+
+  .captions-box {
+    position: absolute;
+    bottom: 24px;
+    left: 18px;
+    right: 18px;
+    background: rgba(0, 0, 0, 0.78);
+    border-left: 4px solid #fbbf24;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #f8fafc;
+    z-index: 20;
+    text-align: center;
+  }
+
+  .controls {
+    margin-top: 18px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  button {
+    background: #fbbf24;
+    color: #092047;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  button:hover {
+    transform: scale(1.05);
+  }
+
+  .timer-display {
+    font-size: 14px;
+    font-weight: 800;
+    color: #94a3b8;
+    min-width: 75px;
+    text-align: center;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="video-container">
+    <div class="glow-circle"></div>
+    <div class="progress-bars" id="progressBars"></div>
+
+    <!-- CENA 1: 0:00 a 0:05 -->
+    <div class="scene active" id="scene-0">
+      <div class="badge-gold">📍 Araraquara - SP</div>
+      <div style="font-size: 46px; margin-bottom: 10px;">🛠️</div>
+      <div style="font-weight: 900; font-size: 18px; letter-spacing: 1px; margin-bottom: 18px; color: #93c5fd;">SOS SERVIÇOS</div>
+      <h1>QUER <span class="gold-text">RENDA EXTRA</span> EM ARARAQUARA?</h1>
+    </div>
+
+    <!-- CENA 2: 0:05 a 0:12 -->
+    <div class="scene" id="scene-1">
+      <h2>Conectamos você a <span class="gold-text">quem precisa</span></h2>
+      <div class="phone-mockup">
+        <div class="phone-header">SOS Serviços • Categorias</div>
+        <div class="services-grid">
+          <div class="service-card"><span>🧹</span>Limpeza</div>
+          <div class="service-card"><span>⚡</span>Elétrica</div>
+          <div class="service-card"><span>🎨</span>Pintura</div>
+          <div class="service-card"><span>🔧</span>Encanador</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENA 3: 0:12 a 0:19 -->
+    <div class="scene" id="scene-2">
+      <div class="badge-gold">Passo 1</div>
+      <h2>Baixe o aplicativo <span class="gold-text">gratuitamente</span></h2>
+      <div class="google-play-btn">
+        <span style="font-size: 28px;">▶️</span>
+        <div class="gp-text">
+          <div class="gp-small">Disponível no</div>
+          <div class="gp-big">Google Play</div>
+        </div>
+      </div>
+      <p style="margin-top: 16px; font-weight: 800; color: #fbbf24; font-size: 18px;">BAIXE GRÁTIS!</p>
+    </div>
+
+    <!-- CENA 4: 0:19 a 0:26 -->
+    <div class="scene" id="scene-3">
+      <div class="badge-gold">Passo 2</div>
+      <h2>Crie seu perfil profissional</h2>
+      <div class="phone-mockup" style="padding: 14px;">
+        <div class="phone-header">Novo Cadastro</div>
+        <div style="background:#e2e8f0; height:24px; border-radius:6px; margin-bottom:8px;"></div>
+        <div style="background:#e2e8f0; height:24px; border-radius:6px; margin-bottom:10px;"></div>
+        <div style="background:#15438e; color:#fff; font-size:11px; font-weight:800; padding:8px; border-radius:8px;">CONCLUIR CADASTRO ✓</div>
+      </div>
+      <div class="feature-pill">✅ Cadastro 100% grátis<br><span class="gold-text">Sem mensalidade</span></div>
+    </div>
+
+    <!-- CENA 5: 0:26 a 0:33 -->
+    <div class="scene" id="scene-4">
+      <div class="badge-gold">Passo 3</div>
+      <h2>Receba pedidos perto de você</h2>
+      <div class="phone-mockup" style="border-color: #fbbf24;">
+        <div class="phone-header">🔔 Novo Pedido!</div>
+        <p style="font-size: 12px; font-weight: 700; color: #334155;">Reparo Elétrico • Centro</p>
+        <div style="background:#16a34a; color:#fff; font-size:11px; font-weight:800; padding:6px; border-radius:6px; margin-top:8px;">ACEITAR PEDIDO</div>
+      </div>
+      <div class="feature-pill">📈 Mais Clientes</div>
+      <div class="feature-pill">🕒 Autonomia Total</div>
+    </div>
+
+    <!-- CENA 6: 0:33 a 0:39 -->
+    <div class="scene" id="scene-5">
+      <div class="badge-gold">Passo 4</div>
+      <div class="big-icon">💼💰</div>
+      <h1><span class="gold-text">RECEBIMENTO</span> GARANTIDO</h1>
+      <p style="margin-top: 12px; font-size: 15px; color: #cbd5e1;">Combinou, executou e recebeu com total segurança.</p>
+    </div>
+
+    <!-- CENA 7: 0:39 a 0:45 -->
+    <div class="scene" id="scene-6">
+      <div class="big-icon">🪙✨</div>
+      <div class="badge-gold" style="font-size: 16px;">+50 MOEDAS GRÁTIS</div>
+      <h2>Indique um amigo e <span class="gold-text">ganhe bônus!</span></h2>
+      <div class="google-play-btn">
+        <span style="font-size: 24px;">▶️</span>
+        <div class="gp-text">
+          <div class="gp-small">Baixe agora no</div>
+          <div class="gp-big">Google Play</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="captions-box" id="captionBox">
+      "Quer ganhar uma renda extra aqui em Araraquara, sem complicação?"
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="playPauseBtn" onclick="togglePlay()">⏸️ Pausar</button>
+    <div class="timer-display" id="timerDisplay">00:00 / 00:45</div>
+    <button onclick="restartVideo()">🔄 Reiniciar</button>
+  </div>
+  <script>
+  const scenesData = [
+    { start: 0, end: 5, caption: '"Quer ganhar uma renda extra aqui em Araraquara, sem complicação?"' },
+    { start: 5, end: 12, caption: '"Muita gente precisa de um profissional de confiança, e muito profissional precisa de clientes. O SOS Serviços conecta os dois."' },
+    { start: 12, end: 19, caption: '"Passo 1: baixe o app SOS Serviços, grátis, no Google Play."' },
+    { start: 19, end: 26, caption: '"Passo 2: faça seu cadastro e escolha seus serviços. É 100% grátis, sem mensalidade."' },
+    { start: 26, end: 33, caption: '"Passo 3: receba pedidos de clientes perto de você e defina seus horários e sua área de atendimento."' },
+    { start: 33, end: 39, caption: '"Combinou, fez o serviço e recebeu com segurança. Simples assim."' },
+    { start: 39, end: 45, caption: '"Indique um amigo e ganhe moedas grátis. Baixe agora o SOS Serviços e comece a faturar!"' }
+  ];
+
+  const totalDuration = 45;
+  let currentTime = 0;
+  let isPlaying = true;
+  let lastTimestamp = null;
+
+  const progressContainer = document.getElementById('progressBars');
+  scenesData.forEach((_, idx) => {
+    const bg = document.createElement('div');
+    bg.className = 'bar-bg';
+    const fill = document.createElement('div');
+    fill.className = 'bar-fill';
+    fill.id = bar-${idx};
+    bg.appendChild(fill);
+    progressContainer.appendChild(bg);
+  });
+
+  function updateUI() {
+    const secs = Math.floor(currentTime).toString().padStart(2, '0');
+    document.getElementById('timerDisplay').textContent = 00:${secs} / 00:45;
+
+    let activeIndex = scenesData.findIndex(s => currentTime >= s.start && currentTime < s.end);
+    if (activeIndex === -1) activeIndex = scenesData.length - 1;
+
+    scenesData.forEach((scene, idx) => {
+      const sceneEl = document.getElementById(scene-${idx});
+      const barEl = document.getElementById(bar-${idx});
+
+      if (idx === activeIndex) {
+        sceneEl.classList.add('active');
+        const sceneDuration = scene.end - scene.start;
+        const pct = Math.min(100, Math.max(0, ((currentTime - scene.start) / sceneDuration) * 100));
+        barEl.style.width = ${pct}%;
+      } else {
+        sceneEl.classList.remove('active');
+        barEl.style.width = idx < activeIndex ? '100%' : '0%';
+      }
+    });
+
+    document.getElementById('captionBox').textContent = scenesData[activeIndex].caption;
+  }
+
+  function loop(timestamp) {
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    const delta = (timestamp - lastTimestamp) / 1000;
+    lastTimestamp = timestamp;
+
+    if (isPlaying) {
+      currentTime += delta;
+      if (currentTime >= totalDuration) {
+        currentTime = totalDuration;
+        isPlaying = false;
+        document.getElementById('playPauseBtn').textContent = '▶️ Assistir';
+      }
+      updateUI();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function togglePlay() {
+    if (currentTime >= totalDuration) {
+      currentTime = 0;
+    }
+    isPlaying = !isPlaying;
+    document.getElementById('playPauseBtn').textContent = isPlaying ? '⏸️ Pausar' : '▶️ Continuar';
+  }
+
+  function restartVideo() {
+    currentTime = 0;
+    isPlaying = true;
+    document.getElementById('playPauseBtn').textContent = '⏸️ Pausar';
+    updateUI();
+  }
+
+  requestAnimationFrame(loop);
+</script>
+</body>
+</html>
